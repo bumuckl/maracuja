@@ -40,6 +40,7 @@ list( APPEND Maracuja_INC
     include/maracuja/util.hpp )
 list( APPEND Maracuja_SRC
 <<<<<<< HEAD
+<<<<<<< HEAD
     src/MSImage.cpp
     src/Spectrum.cpp
     src/Channel.cpp 
@@ -47,6 +48,9 @@ list( APPEND Maracuja_SRC
 =======
     src/MSImage.cpp )
 >>>>>>> official/master
+=======
+	src/SpecOps.cpp )
+>>>>>>> xalpha/specops
 
 # external dependencies of maracuja
 list( APPEND Maracuja_EXTERN_INC

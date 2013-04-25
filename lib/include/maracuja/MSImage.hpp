@@ -300,10 +300,13 @@ inline typename MSImage<T,Ti>::Image MSImage<T,Ti>::convolute( const std::vector
             channels[c] = m_channels[c].image();
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             cimg_library::CImg<uint8_t> convolute( const Spectrum& spectrum);
             cimg_library::CImg<double> convolute_double( const Spectrum& spectrum);
             cimg_library::CImg<uint8_t> convolute( const std::vector<maracuja::Spectrum>& spectra, bool balanced=false );
 =======
+=======
+>>>>>>> xalpha/specops
         // assemble the image
         cimg_library::CImg<T> resultF( m_channels[0].image().width(),
                                        m_channels[0].image().height(),
@@ -311,7 +314,15 @@ inline typename MSImage<T,Ti>::Image MSImage<T,Ti>::convolute( const std::vector
         for( int c=0; c<result.spectrum(); c++ )
             for( size_t i=0; i<m_channels.size(); i++ )
                 resultF.get_shared_channel(c) += coeffs[c][i] * channels[i];
+<<<<<<< HEAD
 >>>>>>> official/master
+=======
+=======
+            cimg_library::CImg<uint8_t> convolute( const Spectrum& spectrum);
+            cimg_library::CImg<double> convolute_double( const Spectrum& spectrum);
+            cimg_library::CImg<uint8_t> convolute( const std::vector<maracuja::Spectrum>& spectra, bool balanced=false );
+>>>>>>> 7e5d767fa2382cab1d58a83ca459c777749a7de5
+>>>>>>> xalpha/specops
 
         resultF.normalize( 0, 255 );
         result = resultF;
