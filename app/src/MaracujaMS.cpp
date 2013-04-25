@@ -72,7 +72,8 @@ MaracujaMS::MaracujaMS(QWidget *parent) :
     connect( ui->filter_toggle_sensor_filter_convolution, SIGNAL(clicked(bool)), this, SLOT(on_toggle_filter_sensor_convolution(void)) );
     connect( ui->filter_apply_filter, SIGNAL(clicked(bool)), this, SLOT(on_apply_filter(void)) );	  
     connect( ui->filter_apply_sensor, SIGNAL(clicked(bool)), this, SLOT(on_apply_sensor(void)) );	
-    connect( ui->filter_apply_both, SIGNAL(clicked(bool)), this, SLOT(on_apply_both(void)) );	 
+    connect( ui->filter_apply_both, SIGNAL(clicked(bool)), this, SLOT(on_apply_both(void)) );
+    connect( ui->filter_show_error, SIGNAL(clicked(bool)), this, SLOT(on_show_error(void)) );	 
 	   
 	   ui->view->addGraph();
 	   ui->view->addGraph();
@@ -837,6 +838,29 @@ void MaracujaMS::on_apply_filter() {
             {   
                 maracuja::Spectrum filter = m_MSImage.channels()[readIdx].filter();
                 this->on_apply_spectrum(filter);
+                this->any_convoluted = true;
+                
+                //Testing the adaption
+                
+                //Calculate intersection of all filter and sensor spectrums
+                /*maracuja::Spectrum* ref;
+                maracuja::Spectrum current = m_MSImage.channels()[0].filter();
+                maracuja::Spectrum sensor = m_MSImage.channels()[0].sensor();
+                maracuja::SpecOps* buildref = new maracuja::SpecOps(current);
+                
+                for (int i=1; i<10; i++) {
+                    current = m_MSImage.channels()[i].filter();
+                    ref = buildref->pairwiseMultiplication(current);
+                    buildref = new maracuja::SpecOps(*ref);    
+                }
+                ref = buildref->pairwiseMultiplication(sensor);
+                
+                maracuja::SpecOps target(filter);
+                maracuja::Spectrum* adapted_spectrum;
+                adapted_spectrum = target.adaptTo(*ref, true);
+                
+                ui->view->graph(5)->setPen(QPen(Qt::red));
+                this->on_show_spectrum(*adapted_spectrum, 5);*/
             }
         }
         else
@@ -872,6 +896,7 @@ void MaracujaMS::on_apply_sensor() {
             {   
                 maracuja::Spectrum sensor = m_MSImage.channels()[readIdx].sensor();
                 this->on_apply_spectrum(sensor);
+                this->any_convoluted = true;
             }
         }
         else
@@ -912,6 +937,7 @@ void MaracujaMS::on_apply_both() {
                 maracuja::Spectrum* testspec = specops.pairwiseMultiplication(sensor);
                     
                 this->on_apply_spectrum(*testspec);
+                this->any_convoluted = true;
             }
         }
         else
@@ -926,6 +952,76 @@ void MaracujaMS::on_apply_both() {
         QMessageBox::critical(this, "Error", QString( e.what() ) );
     }
 
+}
+
+void MaracujaMS::on_show_error() {
+    
+    try
+    {
+        if (m_MSImage.channels().size() > 0)
+        {
+            unsigned readIdx = 0;
+            while (QString(m_MSImage.channels()[readIdx].name().c_str()) != ui->channel_choice->currentText() && readIdx < m_MSImage.channels().size())
+            {
+                readIdx++;
+            }
+            if( m_MSImage.channels()[readIdx].img() == NULL ) // there is no image for the channel
+            {
+                QMessageBox::critical(this, "Warning", QString("No image is loaded for the current channel."));
+            }
+            else if (!this->any_convoluted)
+            {
+                QMessageBox::critical(this, "Warning", QString("You need to perform a convolution first!"));
+            }
+            else
+            {
+                cimg_library::CImg<double> error_image;
+                error_image = (cimg_library::CImg<double>) m_imageRGB - (cimg_library::CImg<double>) m_MSImage.channels()[readIdx].img();
+                error_image += 128.0;
+                
+                // convert image to Qt
+                /*QImage imageQt;
+                cimg2qimg_dbl( error_image, imageQt );
+
+				            std::cout << "readIdx: " << readIdx << std::endl;
+
+                // set the image
+                ui->view->setAxisBackground(QPixmap::fromImage(imageQt), true, Qt::IgnoreAspectRatio );
+                ui->view->xAxis->setRange(0, imageQt.width() );
+                ui->view->yAxis->setRange(0, imageQt.height() );
+                ui->view->replot();*/
+                
+                try
+			            {
+			                 std::string filename = QFileDialog::getSaveFileName(this, "Save Error Image", m_lastDir.c_str(), "Images (*.bmp *.png *.xpm *.jpg *.tif *.tiff)").toStdString();
+			                 if( filename.size() > 0 )
+			                     error_image.save( filename.c_str() );
+
+			                 // update the last dir
+			                 m_lastDir = filename.substr( 0, filename.find_last_of('/') );
+			             }
+			            catch( std::exception &e )
+			            {
+			                 ui->statusBar->showMessage( QString( e.what() ), 5000 );
+			                 std::cerr << e.what() << std::endl;
+			                 QMessageBox::critical(this, "Error", QString( e.what() ) );
+                }
+			    
+            }
+        }
+        else
+        {
+            QMessageBox::critical(this, "Warning", QString("You need first to add a channel and an image."));
+        }
+    }
+    catch( std::exception &e )
+    {
+        ui->statusBar->showMessage( QString( e.what() ), 5000 );
+        std::cerr << e.what() << std::endl;
+        QMessageBox::critical(this, "Error", QString( e.what() ) );
+    }
+    
+    
 }
 
 
@@ -943,7 +1039,7 @@ void MaracujaMS::cimg2qimg( const cimg_library::CImg<uint8_t>& src, QImage& dst 
         dst = QImage( src.data(), src.width(), src.height(), QImage::Format_Indexed8 );
 }
 
-/*void MaracujaMS::cimg2qimg( const cimg_library::CImg<double>& src, QImage& dst )
+void MaracujaMS::cimg2qimg_dbl( const cimg_library::CImg<double>& src, QImage& dst )
 {
     if( src.spectrum() == 3 )
     {
@@ -954,5 +1050,5 @@ void MaracujaMS::cimg2qimg( const cimg_library::CImg<uint8_t>& src, QImage& dst 
             }
     }
     else
-        dst = QImage( src.data(), src.width(), src.height(), QImage::Format_Indexed8 );
-}*/
+        dst = QImage( (uchar*) src.data(), src.width(), src.height(), QImage::Format_Indexed8 );
+}
