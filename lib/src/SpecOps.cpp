@@ -99,13 +99,13 @@ maracuja::Spectrum* SpecOps::pairwiseMultiplication(const maracuja::Spectrum& sp
 	//yep, this loop can be shrinked to only one, but performance is not a hassle right now
 	Eigen::VectorXd resulting_vector = Eigen::VectorXd::Zero(size);
 	for (int i=0; i<size; i++) {
-	    /*if (a[i] == 0.0) {
+	    if (a[i] == 0.0) {
 	        resulting_vector[i] = b[i];
 	    } else if (b[i] == 0.0) {
 	        resulting_vector[i] = a[i];
-	    } else {*/
+	    } else {
 	        resulting_vector[i] = a[i]*b[i];
-	    //} 
+	    } 
 	}
 	
 	result->set(new_start, new_end, resulting_vector, samplerate);
@@ -123,6 +123,7 @@ maracuja::Spectrum* SpecOps::adaptTo(double new_start, double new_end, double sa
 	double peak = 0.0;
 	for (int i=0; i<size; i++) {
 		data[i] = this->interpolateLinearAt(new_start + i*samplerate);
+		
 		if (data[i] > peak) {
 			peak = data[i];
 		}

@@ -181,10 +181,27 @@ namespace maracuja
 
     cimg_library::CImg<uint8_t> MSImage::convolute(const Spectrum &spectrum)
     {
+        Spectrum* ref;
+        Spectrum current = m_channels[0].filter();
+        Spectrum sensor = m_channels[0].sensor();
+        SpecOps* buildref = new SpecOps(current);
+                
+        for (int i=1; i<3; i++) {
+            current = m_channels[i].filter();
+            ref = buildref->pairwiseMultiplication(current);
+            std::cout << ref->data().size() << std::endl;
+            buildref = new SpecOps(*ref);
+        }
+        ref = buildref->pairwiseMultiplication(sensor);        
+        
         //EXTENSION: convert spectrum into the range of of the msimage spectrums
         SpecOps target(spectrum);
         Spectrum* adapted_spectrum;
-        adapted_spectrum = target.adaptTo(m_channels[4].filter(), true);
+        adapted_spectrum = target.adaptTo(*ref, true);
+        
+        std::cout << ref->data().size() << std::endl;
+        std::cout << adapted_spectrum->data().size() << std::endl;
+        std::cout << m_channels[0].filter().data().size() << std::endl;
 		
         /*Eigen::VectorXd data = adapted_spectrum->data();
         for (int i=0; i< data.size(); i++) {
@@ -201,8 +218,9 @@ namespace maracuja
                                             1, 1, 0 );
 
         // reconstruct the image
-        for( size_t i=0; i<m_channels.size(); i++ )
+        for( size_t i=0; i<m_channels.size(); i++ ) {
             result += coeffs[i] * m_channels[i].img();
+        }
 
         return result;
     }

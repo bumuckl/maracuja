@@ -298,6 +298,13 @@
             </widget>
            </item>
            <item>
+            <widget class="QPushButton" name="filter_show_error">
+             <property name="text">
+              <string>Save convolution error</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="filter_apply_filter">
              <property name="text">
               <string>Apply Filter Spectrum to Image</string>

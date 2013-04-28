@@ -70,13 +70,14 @@ public slots:
     void on_toggle_filter_spectrum();
     void on_toggle_sensor_spectrum();
     void on_toggle_filter_sensor_convolution();
+    void on_show_error();
     
     void on_multiply_spectra();
     void on_add_dummy_spectra();
 
 protected:
     void cimg2qimg( const cimg_library::CImg<uint8_t>& src, QImage& dst );
-    //void cimg2qimg( const cimg_library::CImg<double>& src, QImage& dst );
+    void cimg2qimg_dbl( const cimg_library::CImg<double>& src, QImage& dst );
     void on_load_spectrum(maracuja::Spectrum& spec, bool& available);
     void on_show_spectrum(const maracuja::Spectrum& spec, int graph);
     void on_apply_spectrum(maracuja::Spectrum&);
@@ -88,7 +89,7 @@ protected:
 
     // data
     std::string m_lastDir;
-    maracuja::MSImage<double,uint8_t> m_MSImage;
+    maracuja::MSImage m_MSImage;
     cimg_library::CImg<uint8_t> m_imageRGB;
     maracuja::Spectrum a;
     maracuja::Spectrum b;
@@ -97,6 +98,7 @@ protected:
     bool filter_on = false;
     bool sensor_on = false;
     bool filter_sensor_on = false;
+    bool any_convoluted = false;
 
 };
 

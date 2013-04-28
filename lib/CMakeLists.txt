@@ -39,21 +39,23 @@ list( APPEND Maracuja_INC
 	include/maracuja/SpecOps.hpp
     include/maracuja/util.hpp )
 list( APPEND Maracuja_SRC
+    src/MSImage.cpp
+    src/Spectrum.cpp
+    src/Channel.cpp 
 	src/SpecOps.cpp )
 
 # external dependencies of maracuja
 list( APPEND Maracuja_EXTERN_INC
     extern/cimg/CImg.h
     extern/tinyxml2/tinyxml2.h )
-
 list( APPEND Maracuja_EXTERN_SRC
     extern/tinyxml2/tinyxml2.cpp )
 
 # set include directories
 include_directories( ${Maracuja_INCLUDE_DIRS} )
 
-# add cramberry library
-add_library( ${Maracuja_TARGET} STATIC ${Maracuja_INC} ${Maracuja_EXTERN_INC} ${Maracuja_EXTERN_SRC} )
+# add library
+add_library( ${Maracuja_TARGET} ${Maracuja_INC} ${Maracuja_SRC} ${Maracuja_EXTERN_INC} ${Maracuja_EXTERN_SRC} )
 target_link_libraries( ${Maracuja_TARGET} ${Maracuja_LINK_LIBRARIES} )
 
 # configure target
@@ -62,28 +64,20 @@ set_target_properties(${Maracuja_TARGET}
         PUBLIC_HEADER "${Maracuja_INC}"
         COMPILE_DEFINITIONS "${Maracuja_COMPILE_DEFINITIONS}"
         COMPILE_FLAGS "${Maracuja_COMPILE_FLAGS}"
-        LINK_FLAGS "${Maracuja_LINK_FLAGS}"
-        LINKER_LANGUAGE CXX
-                ARCHIVE_OUTPUT_DIRECTORY Release #static libs are archives
-                ARCHIVE_OUTPUT_DIRECTORY_DEBUG Debug
-                ARCHIVE_OUTPUT_NAME MaracujaLib
-                ARCHIVE_OUTPUT_NAME_DEBUG MaracujaLibd ) #debug build should end with a 'd
+        LINK_FLAGS "${Maracuja_LINK_FLAGS}" )
 
-#export target
 export( TARGETS ${Maracuja_TARGET} FILE "${CMAKE_BINARY_DIR}/Maracuja_Depends.cmake")
-
-#INSTALLATION
 
 # install the lib's binary and headers
 install(TARGETS ${Maracuja_TARGET}
-    EXPORT Cramberry
-    RUNTIME DESTINATION "bin"
-    LIBRARY DESTINATION "lib"
-    ARCHIVE DESTINATION "lib"
-    PUBLIC_HEADER DESTINATION "include/maracuja" )
+        EXPORT Maracuja
+        RUNTIME DESTINATION "bin"
+        LIBRARY DESTINATION "lib"
+        ARCHIVE DESTINATION "lib"
+        PUBLIC_HEADER DESTINATION "include/maracuja" )
 
 # install targets
-install(EXPORT Cramberry DESTINATION share )
+install(EXPORT Maracuja DESTINATION share )
 
 # install module finder
 install(FILES "${CMAKE_CURRENT_LIST_DIR}/FindMaracuja.cmake" DESTINATION share )
